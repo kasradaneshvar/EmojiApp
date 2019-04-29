@@ -8,19 +8,99 @@
 
 import UIKit
 
-    // `UICollectionViewDelegateFlowLayout` is to have the default layout for the collection. `self` is automatically also its delegate.
-class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
+extension EmojiArt.EmojiInfo {
+    init?(label: UILabel) {
+        if let attributedText = label.attributedText, let font = attributedText.font {
+            x = Int(label.center.x)
+            y = Int(label.center.y)
+            text = attributedText.string
+            size = Int(font.pointSize)
+        } else {
+            return nil
+        }
+    }
+}
 
+// `UICollectionViewDelegateFlowLayout` is to have the default layout for the collection. `self` is automatically also its delegate.
+class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
+    
+    // MARK: - Model
+    
+    var emojiArt: EmojiArt? { // The "regular" way is perhaps to have functions to go and look at model `var`'s. But it's computed here.
+        get { // Get "looks thru the UI and make the model".
+            if let url = emojiArtBackgroundImage.url {
+                // There is no such `var` in the view as `labels`.
+                //   Instead, labels are added as `subviews` of the view, and here only the
+                //   subviews that `as? UILabel` are accepted. `flatMap` ignores the `nil` ones.
+                let emojis = emojiArtView.subviews.compactMap { $0 as? UILabel }.compactMap { EmojiArt.EmojiInfo(label: $0) }
+                return EmojiArt(url: url, emojis: emojis)
+            }
+            return nil
+        }
+        set { // Set updates the UI. This way UI and model will be in sync.
+            emojiArtBackgroundImage = (nil, nil)
+            emojiArtView.subviews.forEach { $0.removeFromSuperview() }
+            if let url = newValue?.url {
+                imageFetcher = ImageFetcher(fetch: url) { (url, image) in
+                    DispatchQueue.main.async {
+                        self.emojiArtBackgroundImage = (url, image)
+                        // To set the emojis, use view method `addLabel` with `newValue`'s of model.
+                        newValue?.emojis.forEach {
+                            // `attributedString(withTextStyle)` is a function from the Utilities.
+                            let attributedText = $0.text.attributedString(withTextStyle: .body, ofSize: CGFloat($0.size))
+                            self.emojiArtView.addLabel(with: attributedText, centeredAt: CGPoint(x: $0.x, y: $0.y))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let url = try?  FileManager.default.url(
+            for: .documentDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+            ).appendingPathComponent("Untitled.json") {
+            if let jsonData = try? Data(contentsOf: url) {
+                emojiArt = EmojiArt(json: jsonData)
+            }
+        }
+    }
+    
+    // MARK: - Storyboard
+    
+    @IBAction func save(_ sender: UIBarButtonItem) {
+        if let json = emojiArt?.json {
+            // "Not replacing a file so `appropriateFor: nil`"(?).
+            // Also, should add 'Supports Document Brower: Yes' to `info.plist`.
+            if let url = try?  FileManager.default.url(
+                for: .documentDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+                ).appendingPathComponent("Untitled.json") {
+                do {
+                    try json.write(to: url)
+                    print("saved successfully!")
+                } catch let error {
+                    print("error: \(error)")
+                }
+            }
+        }
+    }
+    
     @IBOutlet weak var dropZone: UIView! {
         didSet {
             dropZone.addInteraction(UIDropInteraction(delegate: self))
         }
     }
     
-    //    var emojiArtView: EmojiArtView!
-    var emojiArtView = EmojiArtView()
-    
     @IBOutlet weak var scrollViewHeight: NSLayoutConstraint!
+    
     @IBOutlet weak var scrollViewWidth: NSLayoutConstraint!
     
     @IBOutlet weak var scrollView: UIScrollView! {
@@ -41,14 +121,21 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
         return emojiArtView
     }
     
-    var emojiArtBackgroundImage: UIImage? { // Why need another var? Also `contentSize` is set here. Compare with the previous.
+    // MARK - EmojiArtView Object
+    //    var emojiArtView: EmojiArtView!
+    var emojiArtView = EmojiArtView()
+    
+    private var _emojiArtBackgroundImageUrl: URL? // The `_` is to show that this is a "background storage". It won't be set from here.
+    
+    var emojiArtBackgroundImage: (url:URL?, image: UIImage?) { // Why need another var? Also `contentSize` is set here. Compare with the previous.
         get {
-            return emojiArtView.backgroundImage
+            return (_emojiArtBackgroundImageUrl, emojiArtView.backgroundImage)
         }
         set {
+            _emojiArtBackgroundImageUrl = newValue.url
             scrollView?.zoomScale = 1.0 // Where else could this be set?
-            emojiArtView.backgroundImage = newValue
-            let size = newValue?.size ?? CGSize.zero // Isn't this unwrapping twice? `UIImage` has `var size`?
+            emojiArtView.backgroundImage = newValue.image
+            let size = newValue.image?.size ?? CGSize.zero // Isn't this unwrapping twice? `UIImage` has `var size`?
             emojiArtView.frame = CGRect(origin: CGPoint.zero, size: size)
             scrollView.contentSize = size
             scrollViewHeight?.constant = size.height // Note the "optional chain": in case there is a `prepare`.
@@ -227,8 +314,8 @@ class EmojiArtViewController: UIViewController, UIDropInteractionDelegate, UIScr
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) { // Accept the drop. Recieve the drop. Call the closure.
         imageFetcher = ImageFetcher() { (url, image) in // `init` in `ImageFetcher` is unclear.
             DispatchQueue.main.async { // It doesn't put it on the `main` queue`.
-                //                self.emojiArtView.backgroundImage = image ---> Instead of setting this directly, use `var emojiArtBackgro..ge`
-                self.emojiArtBackgroundImage = image
+                //                self.emojiArtView.backgroundImage = image >>> Instead of setting this directly, use `var emojiArtBackgro..ge`
+                self.emojiArtBackgroundImage = (url, image)
             }
         }
         

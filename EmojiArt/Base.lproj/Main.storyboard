@@ -13,6 +13,7 @@
         <!--Emoji Art Document Table View Controller-->
         <scene sceneID="j85-te-iCy">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YtV-gR-AwM" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="XZA-Wl-5Jq" customClass="EmojiArtDocumentTableViewController" customModule="EmojiArt" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="jTr-Z4-Sha">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="768"/>
@@ -50,7 +51,6 @@
                         </barButtonItem>
                     </navigationItem>
                 </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="YtV-gR-AwM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="909" y="-1159"/>
         </scene>
@@ -63,7 +63,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kl8-mL-Fvq">
-                                <rect key="frame" x="0.0" y="108" width="703.5" height="660"/>
+                                <rect key="frame" x="0.0" y="158" width="703.5" height="610"/>
                                 <subviews>
                                     <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7sF-TD-HHx">
                                         <rect key="frame" x="0.0" y="0.0" width="703.5" height="660"/>
@@ -84,7 +84,7 @@
                                 </constraints>
                             </view>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Cij-Rm-Qda">
-                                <rect key="frame" x="0.0" y="20" width="703.5" height="80"/>
+                                <rect key="frame" x="0.0" y="70" width="703.5" height="80"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="f5z-bc-Jzp"/>
@@ -200,6 +200,13 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <navigationItem key="navigationItem" id="CnF-0a-kbQ">
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="6Kw-7i-Y9p">
+                            <connections>
+                                <action selector="save:" destination="BYZ-38-t0r" id="kNU-7L-4ff"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="dropZone" destination="kl8-mL-Fvq" id="QoE-Ow-syI"/>
                         <outlet property="emojiCollectionView" destination="Cij-Rm-Qda" id="kJ3-to-tiB"/>
@@ -210,14 +217,14 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="19.921875" y="23.4375"/>
+            <point key="canvasLocation" x="744.140625" y="23.4375"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="hLl-DD-cHA">
             <objects>
                 <splitViewController id="QYy-Ym-X07" sceneMemberID="viewController">
                     <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="detailViewController" id="8s5-ah-kdz"/>
+                        <segue destination="URa-Io-nI6" kind="relationship" relationship="detailViewController" id="8s5-ah-kdz"/>
                         <segue destination="0xo-bg-0vH" kind="relationship" relationship="masterViewController" id="gxt-pw-gMW"/>
                     </connections>
                 </splitViewController>
@@ -228,6 +235,7 @@
         <!--Navigation Controller-->
         <scene sceneID="hDI-Zg-SdP">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ekI-rX-Uxb" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0xo-bg-0vH" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="HRX-9D-gQ7">
@@ -239,9 +247,26 @@
                         <segue destination="XZA-Wl-5Jq" kind="relationship" relationship="rootViewController" id="WaF-00-WpS"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="ekI-rX-Uxb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="20" y="-1159"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="hGZ-ka-2El">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="URa-Io-nI6" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="jGx-mz-VSS">
+                        <rect key="frame" x="0.0" y="20" width="703.5" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="q1p-jw-DAF"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hal-IM-gT6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="19.921875" y="23.4375"/>
         </scene>
     </scenes>
 </document>

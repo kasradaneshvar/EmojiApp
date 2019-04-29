@@ -10,6 +10,18 @@ import UIKit
 
 class EmojiArtView: UIView , UIDropInteractionDelegate {
     
+    var backgroundImage: UIImage? { didSet { setNeedsDisplay() } }
+    
+    func addLabel(with attributedString: NSAttributedString, centeredAt point: CGPoint) {
+        let label = UILabel()
+        label.backgroundColor = .clear
+        label.attributedText = attributedString
+        label.sizeToFit()
+        label.center = point
+        addEmojiArtGestureRecognizers(to: label)
+        addSubview(label) // "Add it as a `subView` to `self`.
+    }
+    
     override init(frame: CGRect) { // Absolutely no idea what and why these `init`'s are.
         super.init(frame: frame)
         setup()
@@ -41,17 +53,6 @@ class EmojiArtView: UIView , UIDropInteractionDelegate {
         }
     }
     
-    private func addLabel(with attributedString: NSAttributedString, centeredAt point: CGPoint) {
-        let label = UILabel()
-        label.backgroundColor = .clear
-        label.attributedText = attributedString
-        label.sizeToFit()
-        label.center = point
-        addEmojiArtGestureRecognizers(to: label)
-        addSubview(label) // "Add it as a `subView` to `self`.
-    }
-    var backgroundImage: UIImage? { didSet { setNeedsDisplay() } }
-
     override func draw(_ rect: CGRect) {
         // Drawing code
         backgroundImage?.draw(in: bounds)
